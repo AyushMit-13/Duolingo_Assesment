@@ -10,11 +10,15 @@ app = FastAPI(title="Duolingo Clone API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://duolingo-assesment-jcqr-rep8wz8sv-ayush-d6f7.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 app.include_router(courses.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
