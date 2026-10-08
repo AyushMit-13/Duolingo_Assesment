@@ -19,47 +19,10 @@ def seed_database():
 
     db: Session = SessionLocal()
 
-    if db.query(User).first():
-    existing = db.query(User).all()
-
-    if len(existing) == 1:
-        db.add_all([
-            User(
-                name="Priya",
-                username="priya",
-                xp=340,
-                streak=7,
-                hearts=5,
-                gems=650,
-                daily_goal=50,
-                daily_xp=40,
-            ),
-            User(
-                name="Rahul",
-                username="rahul",
-                xp=280,
-                streak=5,
-                hearts=4,
-                gems=450,
-                daily_goal=50,
-                daily_xp=30,
-            ),
-            User(
-                name="Sneha",
-                username="sneha",
-                xp=190,
-                streak=4,
-                hearts=5,
-                gems=520,
-                daily_goal=50,
-                daily_xp=20,
-            ),
-        ])
-
-        db.commit()
-
-    db.close()
-    return
+    if db.query(Course).first():
+        db.close()
+        print("Database already seeded!")
+        return
 
     user = User(
         name="Ayush",
@@ -72,7 +35,7 @@ def seed_database():
         daily_xp=20,
     )
     db.add(user)
-
+    
     course = Course(
         name="Spanish",
         language="Spanish",
