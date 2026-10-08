@@ -1,29 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 
-export default function LessonPage() {
-  const params = useParams<{ id: string }>();
-  const lessonId = params.id;
+
+import { use, useEffect, useState } from "react";
+export default function LessonPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id: lessonId } = use(params);
+
+  type Exercise = {
+    id: number;
+    type: string;
+    question: string;
+    answer: string;
+    options: string | null;
+    pairs: string | null;
+  };
+
+  type Lesson = {
+    id: number;
+    title: string;
+    xp_reward: number;
+    exercises: Exercise[];
+  };
 
  
-type Exercise = {
-  id: number;
-  type: string;
-  question: string;
-  answer: string;
-  options: string | null;
-  pairs: string | null;
-};
-
-type Lesson = {
-  id: number;
-  title: string;
-  xp_reward: number;
-  exercises: Exercise[];
-};
-
 
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
@@ -41,48 +44,50 @@ type Lesson = {
       .then((data) => setLesson(data));
   }, [lessonId]);
 
-  if (!lesson) {
-    return (
-      <div className="flex min-h-screen items-center justify-center font-bold">
-        Loading lesson...
-      </div>
-    );
-  }
+ if (!lesson) {
+  return (
+    <div className="flex min-h-screen items-center justify-center font-bold">
+      Loading lesson...
+    </div>
+  );
+}
 
-  if (finished) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f7f7f7] px-6">
-        <div className="w-full max-w-md rounded-3xl bg-white p-10 text-center shadow-lg">
-          <div className="text-7xl">🎉</div>
+const currentLesson = lesson;
 
-          <h1 className="mt-6 text-4xl font-black text-[#58cc02]">
-            Lesson Complete!
-          </h1>
+if (finished) {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#f7f7f7] px-6">
+      <div className="w-full max-w-md rounded-3xl bg-white p-10 text-center shadow-lg">
+        <div className="text-7xl">🎉</div>
 
-          <p className="mt-3 text-gray-500">
-            Great job! You finished {lesson.title}.
+        <h1 className="mt-6 text-4xl font-black text-[#58cc02]">
+          Lesson Complete!
+        </h1>
+
+        <p className="mt-3 text-gray-500">
+          Great job! You finished {currentLesson.title}.
+        </p>
+
+        <div className="my-8 rounded-2xl bg-[#fff7d6] p-5">
+          <p className="text-sm font-bold text-gray-500">XP EARNED</p>
+          <p className="text-4xl font-black text-[#ff9600]">
+            +{xp} XP
           </p>
-
-          <div className="my-8 rounded-2xl bg-[#fff7d6] p-5">
-            <p className="text-sm font-bold text-gray-500">XP EARNED</p>
-            <p className="text-4xl font-black text-[#ff9600]">
-              +{xp} XP
-            </p>
-          </div>
-
-          <button
-            onClick={() => (window.location.href = "/")}
-            className="w-full rounded-xl bg-[#58cc02] py-4 font-black text-white shadow-[0_5px_0_#46a302]"
-          >
-            CONTINUE
-          </button>
         </div>
-      </main>
-    );
-  }
 
-  const exercise = lesson.exercises[current];
-  const progress = ((current + 1) / lesson.exercises.length) * 100;
+        <button
+          onClick={() => (window.location.href = "/")}
+          className="w-full rounded-xl bg-[#58cc02] py-4 font-black text-white shadow-[0_5px_0_#46a302]"
+        >
+          CONTINUE
+        </button>
+      </div>
+    </main>
+  );
+}
+
+const exercise = currentLesson.exercises[current];
+const progress = ((current + 1) / currentLesson.exercises.length) * 100;
 
   const options = exercise.options
     ? JSON.parse(exercise.options)
@@ -116,20 +121,23 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/use-heart`, {
   }
 
   function nextExercise() {
-    if (current === lesson.exercises.length - 1) {
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/lessons/${lesson.id}/complete`, {
+  if (current === currentLesson.exercises.length - 1) {
+    fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/lessons/${currentLesson.id}/complete`,
+      {
         method: "POST",
-      });
+      }
+    );
 
-      setFinished(true);
-      return;
-    }
-
-    setCurrent((value) => value + 1);
-    setSelected("");
-    setTyped("");
-    setFeedback("");
+    setFinished(true);
+    return;
   }
+
+  setCurrent((value) => value + 1);
+  setSelected("");
+  setTyped("");
+  setFeedback("");
+}
 
   function renderExercise() {
     if (exercise.type === "multiple_choice") {
